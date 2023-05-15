@@ -26,20 +26,39 @@ int comparar_elementos(void *elemento1, void *elemento2) {
 int main() {
     /* Crear el árbol */
     abb_t *arbol = abb_crear(comparar_elementos);
-
+	//int vector[12] = {10,5,15,2,20,7,12,1,8,22,0,9};
+	int vector_reordenado[12] = {10,9,8,5,2,1,15,12,20,0,22,7};
     /* Insertar elementos */
-    int elem1 = 1;
-    int elem2 = 2;
-    int elem3 = 3;
-    int elem4 = 4;
-    printf("Inserto el elmento: 2\n");
-    arbol = abb_insertar(arbol, &elem2);
-    printf("Inserto el elmento: 1\n");
+    int elem1 = 10;
+    int elem2 = 5;
+    int elem3 = 15;
+    int elem4 = 2;
+    int elem5 = 20;
+    int elem6 = 7;
+    int elem7 = 12;
+    int elem8 = 1;
+    int elem9 = 8;
+    int elem10 = 9;
+    printf("Inserto el elmento: 10\n");
     arbol = abb_insertar(arbol, &elem1);
-    printf("Inserto el elmento: 4\n");
-    arbol = abb_insertar(arbol, &elem4);
-    printf("Inserto el elmento: 3\n");
+    printf("Inserto el elmento: 5\n");
+    arbol = abb_insertar(arbol, &elem2);
+    printf("Inserto el elmento: 15\n");
     arbol = abb_insertar(arbol, &elem3);
+    printf("Inserto el elmento: 2\n");
+    arbol = abb_insertar(arbol, &elem4);
+    printf("Inserto el elmento: 20\n");
+    arbol = abb_insertar(arbol, &elem5);
+    printf("Inserto el elmento: 7\n");
+    arbol = abb_insertar(arbol, &elem6);
+    printf("Inserto el elmento: 12\n");
+    arbol = abb_insertar(arbol, &elem7);
+    printf("Inserto el elmento: 1\n");
+    arbol = abb_insertar(arbol, &elem8);
+    printf("Inserto el elmento: 8\n");
+    arbol = abb_insertar(arbol, &elem9);
+    printf("Inserto el elmento: 9\n");
+    arbol = abb_insertar(arbol, &elem10);
 
     /* Verificar tamaño y si está vacío */
     printf("Tamaño del árbol: %zu\n", abb_tamanio(arbol));
@@ -59,8 +78,13 @@ int main() {
     printf("\n");
 
     /* Eliminar elementos */
-    abb_quitar(arbol, &elem3);
-    printf("Tamaño del árbol después de eliminar un elemento: %zu\n", abb_tamanio(arbol));
+	printf("eliminar elementos:\n");
+	for (size_t i = 0; i<11;i++){
+		printf("\nquito elemento [%zu]= %d\n", i, vector_reordenado[i]);
+	    abb_quitar(arbol, &vector_reordenado[i]);
+    	abb_con_cada_elemento(arbol, PREORDEN, imprimir_elemento, NULL);
+    	printf("Tamaño del árbol después de eliminar un elemento: %zu\n", abb_tamanio(arbol));
+	}
 
     /* Destruir el árbol */
     abb_destruir(arbol);
