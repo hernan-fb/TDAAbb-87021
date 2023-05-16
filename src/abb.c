@@ -279,36 +279,76 @@ void abb_destruir_todo(abb_t *arbol, void (*destructor)(void *))
 	return;
 }
 
-size_t abb_preorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux) {
-	if (!nodo)
+size_t abb_preorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux, bool* ejecucion) {
+	if (!nodo || !(*ejecucion)) {
 		return 0;
-
-	bool validacion = funcion(nodo->elemento, aux);
-	if (nodo->elemento) 		
-		printf("visito nodo: %d\n",*(int*)nodo->elemento);
-	size_t contador = 0;
-	size_t resu = 0;
-	if (aux) {
-		printf("aux vale: %d\n", *(int*)aux);
 	}
-	if (validacion) {
+	//if (nodo->elemento) 		
+	//	printf("visito nodo: %d\n",*(int*)nodo->elemento);
+	size_t contador = 0;
+	if (funcion == NULL || funcion(nodo->elemento, aux) ) {
+	//	printf(" visite nodo\n");
 		contador++;
 	}
 	else {
-		printf(" funcion devolvió false\n");
-		return 0;
+		*ejecucion = false;
+	//	printf("detuvo ejecucion\n");
+		return 1;
 	}
-	resu = abb_preorden(nodo->izquierda, funcion, aux);
-	contador += resu;
-	if (resu == 0) return contador;
-	contador += abb_preorden(nodo->derecha, funcion, aux);
+	contador += abb_preorden(nodo->izquierda, funcion, aux, ejecucion);
+	contador += abb_preorden(nodo->derecha, funcion, aux, ejecucion);
+	//printf("return contador %zu\n", contador);
 	return contador;
 }
-size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux) {
-	return 0;
+size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux, bool* ejecucion) {
+	if (!nodo || !(*ejecucion)) {
+		printf("ejecucion detenida\n");
+		return 0;
+	}
+	if (nodo->elemento) 		
+		printf("visito nodo: %d\n",*(int*)nodo->elemento);
+	size_t contador = 0;
+	contador += abb_inorden(nodo->izquierda, funcion, aux, ejecucion);
+	if ((*ejecucion) && (funcion == NULL || funcion(nodo->elemento, aux) )) {
+		printf(" visite nodo\n");
+		contador++;
+	}
+	else {
+		*ejecucion = false;
+		printf("detuvo ejecucion\n");
+		return 1;
+	}
+	contador += abb_inorden(nodo->derecha, funcion, aux, ejecucion);
+	printf("return contador %zu\n", contador);
+	return contador;
 }
-size_t abb_postorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux) {
-	return 0;
+size_t abb_postorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux, bool* ejecucion) {
+	if (!nodo || !(*ejecucion)) {
+		printf("ejecucion detenida nodo: %p y nodo->elemento %d", (void*)nodo, *(int*)nodo->elemento);
+		if (nodo->elemento) {	
+			printf(" al procesar nodo %d",*(int*)nodo->elemento);
+		}
+		printf("\n");
+		return 0;
+	}
+	if (nodo->elemento) 		
+		printf("pase por nodo: %d\n",*(int*)nodo->elemento);
+	size_t contador = 0;
+	contador += abb_postorden(nodo->izquierda, funcion, aux, ejecucion);
+	contador += abb_postorden(nodo->derecha, funcion, aux, ejecucion);
+	if ((*ejecucion) && funcion(nodo->elemento, aux) ) {
+		if (nodo->elemento) 		
+			printf("ahora visite nodo %d y ejecucion es %s\n",*(int*)nodo->elemento,(*ejecucion)?"true":"false");
+		contador++;
+	}
+	else {
+		*ejecucion = false;
+		if (nodo->elemento) 		
+			printf("detuvo ejecucion al procesar nodo %d\n",*(int*)nodo->elemento);
+		return 1;
+	}
+	printf("contador is %zu\n", contador);
+	return contador;
 }
 
 size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
@@ -316,18 +356,19 @@ size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
 {
 	printf("abb_con_cada_elemento\n");
 	size_t cuantos = 0;
-	if (!arbol || arbol->tamanio == 0) {
+	bool ejecucion = true;
+	if (!arbol || arbol->tamanio == 0 || !funcion) {
 		return cuantos;
 	}
 	switch (recorrido) {
 		case PREORDEN:
-			cuantos = abb_preorden(arbol->nodo_raiz, funcion, aux);
+			cuantos = abb_preorden(arbol->nodo_raiz, funcion, aux, &ejecucion);
 			break;
 		case INORDEN:
-			cuantos = abb_inorden(arbol->nodo_raiz, funcion, aux);
+			cuantos = abb_inorden(arbol->nodo_raiz, funcion, aux, &ejecucion);
 			break;
 		case POSTORDEN:
-			cuantos = abb_postorden(arbol->nodo_raiz, funcion, aux);
+			cuantos = abb_postorden(arbol->nodo_raiz, funcion, aux, &ejecucion);
 			break;
 		default:
 			break;
@@ -340,21 +381,62 @@ void imprime_array(void** array, size_t tamanio) {
 	for(size_t i = 0; i<tamanio; i++){
 		printf("%d ", *(int*)array[i]);
 	}
+	printf("\n");
 }
 
 size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
-		    size_t tamanio_array, size_t* p_contador) {
-	if (*p_contador == tamanio_array) {
+		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
+	if (!nodo || *p_contador == tamanio_array || !(*ejecucion)) {
 		return (*p_contador);
 	}
 	array[*p_contador] = nodo->elemento;
 	(*p_contador)++;
 	imprime_array(array,(*p_contador));
-	if (nodo->izquierda)
-		(*p_contador) = abb_recorrer_nodo_preorden(nodo->izquierda, array, tamanio_array, p_contador);
-	if (nodo->derecha)
-		(*p_contador) = abb_recorrer_nodo_preorden(nodo->derecha, array, tamanio_array, p_contador);
+	(*p_contador) = abb_recorrer_nodo_preorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
+	(*p_contador) = abb_recorrer_nodo_preorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
 	return *p_contador;
+}
+size_t abb_recorrer_nodo_inorden(nodo_abb_t *nodo, void **array,
+		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
+	if (!nodo || *p_contador == tamanio_array || !(*ejecucion)) {
+		return (*p_contador);
+	}
+	(*p_contador) = abb_recorrer_nodo_inorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
+	array[*p_contador] = nodo->elemento;
+	(*p_contador)++;
+	imprime_array(array,(*p_contador));
+	(*p_contador) = abb_recorrer_nodo_inorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
+	return *p_contador;
+}
+size_t abb_recorrer_nodo_postorden(nodo_abb_t *nodo, void **array,
+		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
+	if (!nodo) 
+		return (*p_contador);
+	printf("paso por aca\n");
+	(*p_contador) = abb_recorrer_nodo_postorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
+	(*p_contador) = abb_recorrer_nodo_postorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
+	if (nodo->elemento)
+		printf("guardo en posicion %zu elemento: %d, tamanio: %zu\n",(*p_contador), *(int*)nodo->elemento, tamanio_array);
+	if(*ejecucion) {
+		printf("ejecucion es true\n");
+		array[*p_contador] = nodo->elemento;
+		(*p_contador)++;
+	}
+	if ( (*p_contador) >= tamanio_array || !(*ejecucion)) {
+		printf("ejecucion detenida, p_contador: %zu y tamanio_array: %zu\n",*p_contador, tamanio_array);
+		(*ejecucion) = false;
+		return (*p_contador);
+	}
+	imprime_array(array,(*p_contador));
+	return *p_contador;
+}
+bool funcioncita(void* elemento, void* aux) {
+	if ( *(size_t*)aux == 0 ){
+		printf("imprimiendo arreglo: ");
+		*(size_t*)aux = 1;
+	}
+	printf("%d  ", *(int*)elemento);
+	return true;
 }
 
 size_t abb_recorrer(abb_t *arbol, abb_recorrido recorrido, void **array,
@@ -362,18 +444,22 @@ size_t abb_recorrer(abb_t *arbol, abb_recorrido recorrido, void **array,
 {
 	printf("abb_recorrer\n");
 	size_t contador = 0;
+	bool ejecucion = true;
 	if (!arbol || arbol->tamanio == 0) {
 		return contador;
 	}
+	size_t aux = 0;
 	switch (recorrido) {
 		case PREORDEN:
-			contador = abb_recorrer_nodo_preorden(arbol->nodo_raiz, array, tamanio_array, &contador);
+			contador = abb_recorrer_nodo_preorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
 			break;
 		case INORDEN:
-			// contador = abb_recorrer_nodo_inorden(arbol->nodo_raiz, array, tamanio_array, &contador);
+			contador = abb_recorrer_nodo_inorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
 			break;
 		case POSTORDEN:
-			// contador = abb_recorrer_nodo_postorden(arbol->nodo_raiz, array, tamanio_array, &contador);
+			abb_con_cada_elemento(arbol, POSTORDEN, funcioncita, &aux );
+			printf("\n");
+			contador = abb_recorrer_nodo_postorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
 			break;
 		default:
 			break;
