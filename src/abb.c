@@ -32,7 +32,7 @@ abb_t *abb_crear(abb_comparador comparador)
 }
 
 nodo_abb_t *abb_insertar_nodo(nodo_abb_t *nodo, void *elemento, abb_comparador comparador) {
-	printf("abb_insertar_nodo\n");
+	//printf("abb_insertar_nodo\n");
 	// printf("insertando\n");
 	if (!nodo) {
 		//printf("insertando\n");
@@ -53,11 +53,13 @@ nodo_abb_t *abb_insertar_nodo(nodo_abb_t *nodo, void *elemento, abb_comparador c
 
 abb_t *abb_insertar(abb_t *arbol, void *elemento)
 {
-	printf("abb_insertar\n");
+	printf("abb_insertar\nel elemento apunta a %p\n", elemento);
 	if (!arbol) {
 		return NULL;
 	}
-	printf("inserto %d\n", *(int*)elemento);
+	if (elemento){
+		printf("inserto %d\n", *(int*)elemento);
+	}
 	arbol->nodo_raiz = abb_insertar_nodo(arbol->nodo_raiz, elemento, arbol->comparador);
 	arbol->tamanio++;
 	return arbol;
@@ -90,25 +92,30 @@ void *abb_quitar_nodo(nodo_abb_t *nodo, nodo_abb_t *padre, abb_t *arbol) {
     if (nodo->izquierda) {
 		printf("nodo tiene izquierda\n");
         nodo_abb_t *padre_predecesor = buscar_padre_predecesor_inorden(nodo->izquierda);
-		printf("el padre del predecesor es: %d\n", *(int*)padre_predecesor->elemento);
+		if (padre_predecesor->elemento) 
+			printf("el padre del predecesor es: %d\n", *(int*)padre_predecesor->elemento);
 		if (padre_predecesor==nodo->izquierda && !padre_predecesor->derecha){
 			//nodo->izquierda no tiene hijos derechos 1
 			printf("el padre del predecesor es el nodo izquierda del nodo a borrar\t nodo->izquierda no tiene hijos derechos\n");
 			padre_predecesor = nodo;
 			predecesor = nodo->izquierda;
-			printf("predecesor es: %d\n",*(int*)predecesor->elemento);
+			if (predecesor->elemento)
+				printf("predecesor es: %d\n",*(int*)predecesor->elemento);
 			nodo_a_liberar = predecesor;
 			swap_contenido_de_nodos_abb(predecesor, nodo);
-			printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
+			if (predecesor->elemento)
+				printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
 			padre_predecesor->izquierda = predecesor->izquierda;
 		} else {
 			// nodo->izquierda si tiene hijos derechos
 			printf("nodo->izquierda si tiene hijos derechos\n");
 			predecesor = padre_predecesor->derecha;
-			printf("predecesor es: %d\n",*(int*)predecesor->elemento);
+			if (predecesor->elemento)
+				printf("predecesor es: %d\n",*(int*)predecesor->elemento);
 			nodo_a_liberar = predecesor;
 			swap_contenido_de_nodos_abb(predecesor, nodo);
-			printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
+			if (predecesor->elemento)
+				printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
 			padre_predecesor->derecha = predecesor->izquierda;
 		}
     } else if (nodo->derecha) { 
@@ -142,10 +149,13 @@ nodo_abb_t *abb_padre_de_nodo_buscado(nodo_abb_t *nodo, nodo_abb_t *padre, void 
 	if (!nodo) {
 		return NULL;
 	}
-	printf("comparo nodo->elemento: %d con elemento_buscado: %d\n", *(int*)nodo->elemento, *(int*)elemento);
+	if (elemento) {
+		printf("comparo nodo->elemento: %d con elemento_buscado: %d\n", *(int*)nodo->elemento, *(int*)elemento);
+	}
 	int cmp = comparador(nodo->elemento, elemento);
 	if (cmp == 0) {
-		printf("retorno: %d\n", *(int*)padre->elemento);
+		if (padre->elemento) 
+			printf("retorno: %d\n", *(int*)padre->elemento);
 		return padre;
 	}
 	if (cmp < 0) {
@@ -156,19 +166,23 @@ nodo_abb_t *abb_padre_de_nodo_buscado(nodo_abb_t *nodo, nodo_abb_t *padre, void 
 
 void *abb_quitar(abb_t *arbol, void *elemento)
 {
-	if (!arbol || !elemento) {
+	if (!arbol) {
 		return NULL;
 	}
-	printf("abb_quitar elemento: %d\n", *(int*)elemento);
+	if (elemento) {
+		printf("abb_quitar elemento: %d\n", *(int*)elemento);
+	}
 	nodo_abb_t* nodo_padre = abb_padre_de_nodo_buscado(arbol->nodo_raiz, arbol->nodo_raiz, elemento, arbol->comparador);
 	nodo_abb_t* nodo_buscado = NULL;
 	if (nodo_padre == NULL) {
 		printf("nodo_padre es NULL, no se encontró el elemento buscado\n");
 		return NULL;
 	} 
-	printf("padre del nodo buscado es: %d\n", *(int*)(nodo_padre->elemento));	
+	if (nodo_padre->elemento) 
+		printf("padre del nodo buscado es: %d\n", *(int*)(nodo_padre->elemento));	
 	if (nodo_padre == arbol->nodo_raiz && arbol->comparador(nodo_padre->elemento, elemento) == 0) {
-		printf("nodo buscado es el nodo raiz: %d\n", *(int*)nodo_padre->elemento);	
+		if (nodo_padre->elemento) 		
+			printf("nodo buscado es el nodo raiz: %d\n", *(int*)nodo_padre->elemento);	
 		nodo_buscado = nodo_padre;
 	} else if (nodo_padre->derecha != NULL && arbol->comparador(nodo_padre->derecha->elemento, elemento) == 0) {
 		printf("el nodo buscado es nodo_padre->derecha: %d\n", *(int*)nodo_padre->derecha->elemento);	
@@ -210,6 +224,9 @@ bool abb_vacio(abb_t *arbol)
 
 size_t abb_tamanio(abb_t *arbol)
 {
+	if (!arbol) {
+		return 0;
+	}
 	printf("imprimo tamanio: %zu\n", arbol->tamanio);
 	return arbol->tamanio;
 }
@@ -223,50 +240,68 @@ void abb_destruir_nodo(nodo_abb_t *nodo)
 		abb_destruir_nodo(nodo->derecha);
 	if (nodo->izquierda)
 		abb_destruir_nodo(nodo->izquierda);
+	if (nodo->elemento){
+		printf("destruyendo nodo: %d\n", *(int*)nodo->elemento);
+	} else {
+		printf("destruyendo nodo\n");
+	}
 	free(nodo);
 }
 
 void abb_destruir(abb_t *arbol)
 {
 	printf("abb_destruir\n");
-	abb_destruir_nodo(arbol->nodo_raiz);
+	if (arbol)
+		abb_destruir_nodo(arbol->nodo_raiz);
 }
 
 void abb_destruir_todo_nodo(nodo_abb_t *nodo, void (*destructor)(void *)) {
 	if (!nodo) {
 		return;
 	}
-	if (!nodo->derecha && !nodo->izquierda) {
-		destructor(nodo->elemento);
-		free(nodo);
-	}
-	if (!nodo->derecha){
+	if (nodo->derecha){ //nodo->izquierda
 		abb_destruir_todo_nodo(nodo->derecha, destructor);
 	}
-	if (!nodo->izquierda){
+	if (nodo->izquierda){
 		abb_destruir_todo_nodo(nodo->izquierda, destructor);
 	}
+	if (destructor)
+		destructor(nodo->elemento);
+	free(nodo);
 	return;
 }
 
 void abb_destruir_todo(abb_t *arbol, void (*destructor)(void *))
 {
 	printf("abb_destruir_todo\n");
-	abb_destruir_todo_nodo(arbol->nodo_raiz, destructor);
+	if (arbol)
+		abb_destruir_todo_nodo(arbol->nodo_raiz, destructor);
 	return;
 }
 
 size_t abb_preorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux) {
+	if (!nodo)
+		return 0;
+
 	bool validacion = funcion(nodo->elemento, aux);
+	if (nodo->elemento) 		
+		printf("visito nodo: %d\n",*(int*)nodo->elemento);
 	size_t contador = 0;
-	if (validacion)
+	size_t resu = 0;
+	if (aux) {
+		printf("aux vale: %d\n", *(int*)aux);
+	}
+	if (validacion) {
 		contador++;
-	else
-		return contador;
-	if (nodo->izquierda)
-		contador += abb_preorden(nodo->izquierda, funcion, aux);
-	if (nodo->derecha)
-		contador += abb_preorden(nodo->derecha, funcion, aux);
+	}
+	else {
+		printf(" funcion devolvió false\n");
+		return 0;
+	}
+	resu = abb_preorden(nodo->izquierda, funcion, aux);
+	contador += resu;
+	if (resu == 0) return contador;
+	contador += abb_preorden(nodo->derecha, funcion, aux);
 	return contador;
 }
 size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux) {
@@ -300,6 +335,13 @@ size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
 	return cuantos;
 }
 
+void imprime_array(void** array, size_t tamanio) {
+	printf("imprimiendo arreglo: ");
+	for(size_t i = 0; i<tamanio; i++){
+		printf("%d ", *(int*)array[i]);
+	}
+}
+
 size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
 		    size_t tamanio_array, size_t* p_contador) {
 	if (*p_contador == tamanio_array) {
@@ -307,10 +349,11 @@ size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
 	}
 	array[*p_contador] = nodo->elemento;
 	(*p_contador)++;
-	if (nodo->derecha)
-		(*p_contador) = abb_recorrer_nodo_preorden(nodo->derecha, array, tamanio_array, p_contador);
+	imprime_array(array,(*p_contador));
 	if (nodo->izquierda)
 		(*p_contador) = abb_recorrer_nodo_preorden(nodo->izquierda, array, tamanio_array, p_contador);
+	if (nodo->derecha)
+		(*p_contador) = abb_recorrer_nodo_preorden(nodo->derecha, array, tamanio_array, p_contador);
 	return *p_contador;
 }
 
@@ -319,7 +362,7 @@ size_t abb_recorrer(abb_t *arbol, abb_recorrido recorrido, void **array,
 {
 	printf("abb_recorrer\n");
 	size_t contador = 0;
-	if (!arbol) {
+	if (!arbol || arbol->tamanio == 0) {
 		return contador;
 	}
 	switch (recorrido) {
