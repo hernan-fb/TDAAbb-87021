@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 nodo_abb_t *nodo_abb_crear(void *elemento) {
 	nodo_abb_t *nodo = malloc(sizeof(nodo_abb_t));
 	if (!nodo) {
@@ -16,36 +17,27 @@ nodo_abb_t *nodo_abb_crear(void *elemento) {
 
 abb_t *abb_crear(abb_comparador comparador)
 {
-	printf("abb_crear\n");
 	if (!comparador) {
 		return NULL;
 	}
-	abb_t *abb = malloc(sizeof(abb_comparador));
+	abb_t *abb = malloc(sizeof(abb_t));
 	if (!abb) {
 		return NULL;
 	}
 	abb->comparador = comparador;
 	abb->tamanio = 0;
-	//nodo_abb_t *nodo = nodo_abb_crear(NULL);
 	abb->nodo_raiz = NULL;
 	return abb;
 }
 
 nodo_abb_t *abb_insertar_nodo(nodo_abb_t *nodo, void *elemento, abb_comparador comparador) {
-	//printf("abb_insertar_nodo\n");
-	// printf("insertando\n");
 	if (!nodo) {
-		//printf("insertando\n");
 		return nodo_abb_crear(elemento);
 	}
-	// printf("insertando\n");
 	int cmp = comparador(nodo->elemento, elemento);
-	// printf("cmp: %d\n", cmp);
 	if (cmp < 0) {
-		// printf("<0\n");
 		nodo->derecha = abb_insertar_nodo(nodo->derecha, elemento, comparador);
 	} else {
-		// printf(">0\n");
 		nodo->izquierda = abb_insertar_nodo(nodo->izquierda, elemento, comparador);
 	}
 	return nodo;
@@ -53,12 +45,8 @@ nodo_abb_t *abb_insertar_nodo(nodo_abb_t *nodo, void *elemento, abb_comparador c
 
 abb_t *abb_insertar(abb_t *arbol, void *elemento)
 {
-	printf("abb_insertar\nel elemento apunta a %p\n", elemento);
 	if (!arbol) {
 		return NULL;
-	}
-	if (elemento){
-		printf("inserto %d\n", *(int*)elemento);
 	}
 	arbol->nodo_raiz = abb_insertar_nodo(arbol->nodo_raiz, elemento, arbol->comparador);
 	arbol->tamanio++;
@@ -90,36 +78,22 @@ void *abb_quitar_nodo(nodo_abb_t *nodo, nodo_abb_t *padre, abb_t *arbol) {
 	nodo_abb_t* predecesor = NULL;
 	nodo_abb_t* nodo_a_liberar = NULL;
     if (nodo->izquierda) {
-		printf("nodo tiene izquierda\n");
         nodo_abb_t *padre_predecesor = buscar_padre_predecesor_inorden(nodo->izquierda);
-		if (padre_predecesor->elemento) 
-			printf("el padre del predecesor es: %d\n", *(int*)padre_predecesor->elemento);
 		if (padre_predecesor==nodo->izquierda && !padre_predecesor->derecha){
 			//nodo->izquierda no tiene hijos derechos 1
-			printf("el padre del predecesor es el nodo izquierda del nodo a borrar\t nodo->izquierda no tiene hijos derechos\n");
 			padre_predecesor = nodo;
 			predecesor = nodo->izquierda;
-			if (predecesor->elemento)
-				printf("predecesor es: %d\n",*(int*)predecesor->elemento);
 			nodo_a_liberar = predecesor;
 			swap_contenido_de_nodos_abb(predecesor, nodo);
-			if (predecesor->elemento)
-				printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
 			padre_predecesor->izquierda = predecesor->izquierda;
 		} else {
 			// nodo->izquierda si tiene hijos derechos
-			printf("nodo->izquierda si tiene hijos derechos\n");
 			predecesor = padre_predecesor->derecha;
-			if (predecesor->elemento)
-				printf("predecesor es: %d\n",*(int*)predecesor->elemento);
 			nodo_a_liberar = predecesor;
 			swap_contenido_de_nodos_abb(predecesor, nodo);
-			if (predecesor->elemento)
-				printf("nodo a liberar es: %d\n",*(int*)predecesor->elemento);
 			padre_predecesor->derecha = predecesor->izquierda;
 		}
     } else if (nodo->derecha) { 
-		printf("nodo tiene derecha\n");
 		// solamente tengo nodo->derecha, elijo swapear con ese nodo->derecha y nodo
 		// pero podria tomar el hijo mas izquierdo del nodo->derecha
 		swap_contenido_de_nodos_abb(nodo->derecha, nodo);
@@ -127,16 +101,13 @@ void *abb_quitar_nodo(nodo_abb_t *nodo, nodo_abb_t *padre, abb_t *arbol) {
 		nodo_a_liberar = nodo->derecha;
 		nodo->derecha = nodo->derecha->derecha;
     } else {
-		printf("nodo else\n");
 		if (padre->derecha == nodo)
 			padre->derecha = NULL;
 		else
 			padre->izquierda = NULL;
 		nodo_a_liberar = nodo;
     }
-	printf("tamanio antes: %zu\n", arbol->tamanio);
     arbol->tamanio--;
-	printf("tamanio despues: %zu\n", arbol->tamanio);
 	void* dato_del_nodo_a_liberar = nodo_a_liberar->elemento;
     free(nodo_a_liberar);
 	if(arbol->tamanio==0){
@@ -149,13 +120,8 @@ nodo_abb_t *abb_padre_de_nodo_buscado(nodo_abb_t *nodo, nodo_abb_t *padre, void 
 	if (!nodo) {
 		return NULL;
 	}
-	if (elemento) {
-		printf("comparo nodo->elemento: %d con elemento_buscado: %d\n", *(int*)nodo->elemento, *(int*)elemento);
-	}
 	int cmp = comparador(nodo->elemento, elemento);
 	if (cmp == 0) {
-		if (padre->elemento) 
-			printf("retorno: %d\n", *(int*)padre->elemento);
 		return padre;
 	}
 	if (cmp < 0) {
@@ -169,26 +135,16 @@ void *abb_quitar(abb_t *arbol, void *elemento)
 	if (!arbol) {
 		return NULL;
 	}
-	if (elemento) {
-		printf("abb_quitar elemento: %d\n", *(int*)elemento);
-	}
 	nodo_abb_t* nodo_padre = abb_padre_de_nodo_buscado(arbol->nodo_raiz, arbol->nodo_raiz, elemento, arbol->comparador);
 	nodo_abb_t* nodo_buscado = NULL;
 	if (nodo_padre == NULL) {
-		printf("nodo_padre es NULL, no se encontró el elemento buscado\n");
 		return NULL;
 	} 
-	if (nodo_padre->elemento) 
-		printf("padre del nodo buscado es: %d\n", *(int*)(nodo_padre->elemento));	
 	if (nodo_padre == arbol->nodo_raiz && arbol->comparador(nodo_padre->elemento, elemento) == 0) {
-		if (nodo_padre->elemento) 		
-			printf("nodo buscado es el nodo raiz: %d\n", *(int*)nodo_padre->elemento);	
 		nodo_buscado = nodo_padre;
 	} else if (nodo_padre->derecha != NULL && arbol->comparador(nodo_padre->derecha->elemento, elemento) == 0) {
-		printf("el nodo buscado es nodo_padre->derecha: %d\n", *(int*)nodo_padre->derecha->elemento);	
 		nodo_buscado = nodo_padre->derecha;
 	} else {
-		printf("el nodo buscado es nodo_padre->izquierda: %d\n", *(int*)nodo_padre->izquierda->elemento);	
 		nodo_buscado = nodo_padre->izquierda;
 	}
 
@@ -197,7 +153,6 @@ void *abb_quitar(abb_t *arbol, void *elemento)
 
 void *abb_buscar(abb_t *arbol, void *elemento)
 {
-	printf("abb_buscar\n");
 	if (!arbol) {
 		return NULL;
 	}
@@ -215,7 +170,6 @@ void *abb_buscar(abb_t *arbol, void *elemento)
 
 bool abb_vacio(abb_t *arbol)
 {
-	printf("abb_vacio\n");
 	if (!arbol) {
 		return true;
 	}
@@ -227,7 +181,6 @@ size_t abb_tamanio(abb_t *arbol)
 	if (!arbol) {
 		return 0;
 	}
-	printf("imprimo tamanio: %zu\n", arbol->tamanio);
 	return arbol->tamanio;
 }
 
@@ -240,19 +193,14 @@ void abb_destruir_nodo(nodo_abb_t *nodo)
 		abb_destruir_nodo(nodo->derecha);
 	if (nodo->izquierda)
 		abb_destruir_nodo(nodo->izquierda);
-	if (nodo->elemento){
-		printf("destruyendo nodo: %d\n", *(int*)nodo->elemento);
-	} else {
-		printf("destruyendo nodo\n");
-	}
 	free(nodo);
 }
 
 void abb_destruir(abb_t *arbol)
 {
-	printf("abb_destruir\n");
 	if (arbol)
 		abb_destruir_nodo(arbol->nodo_raiz);
+	free(arbol);
 }
 
 void abb_destruir_todo_nodo(nodo_abb_t *nodo, void (*destructor)(void *)) {
@@ -273,9 +221,9 @@ void abb_destruir_todo_nodo(nodo_abb_t *nodo, void (*destructor)(void *)) {
 
 void abb_destruir_todo(abb_t *arbol, void (*destructor)(void *))
 {
-	printf("abb_destruir_todo\n");
 	if (arbol)
 		abb_destruir_todo_nodo(arbol->nodo_raiz, destructor);
+	free(arbol);
 	return;
 }
 
@@ -283,78 +231,60 @@ size_t abb_preorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux
 	if (!nodo || !(*ejecucion)) {
 		return 0;
 	}
-	//if (nodo->elemento) 		
-	//	printf("visito nodo: %d\n",*(int*)nodo->elemento);
 	size_t contador = 0;
 	if (funcion == NULL || funcion(nodo->elemento, aux) ) {
-	//	printf(" visite nodo\n");
 		contador++;
 	}
 	else {
 		*ejecucion = false;
-	//	printf("detuvo ejecucion\n");
 		return 1;
 	}
 	contador += abb_preorden(nodo->izquierda, funcion, aux, ejecucion);
 	contador += abb_preorden(nodo->derecha, funcion, aux, ejecucion);
-	//printf("return contador %zu\n", contador);
 	return contador;
 }
 size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux, bool* ejecucion) {
-	if (!nodo || !(*ejecucion)) {
-		printf("ejecucion detenida\n");
+	if (!nodo) {
 		return 0;
 	}
-	if (nodo->elemento) 		
-		printf("visito nodo: %d\n",*(int*)nodo->elemento);
+	if (!(*ejecucion)) {
+		return 0;
+	}
 	size_t contador = 0;
 	contador += abb_inorden(nodo->izquierda, funcion, aux, ejecucion);
 	if ((*ejecucion) && (funcion == NULL || funcion(nodo->elemento, aux) )) {
-		printf(" visite nodo\n");
 		contador++;
 	}
 	else {
 		*ejecucion = false;
-		printf("detuvo ejecucion\n");
-		return 1;
+		return ++contador;
 	}
 	contador += abb_inorden(nodo->derecha, funcion, aux, ejecucion);
-	printf("return contador %zu\n", contador);
 	return contador;
 }
 size_t abb_postorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux, bool* ejecucion) {
-	if (!nodo || !(*ejecucion)) {
-		printf("ejecucion detenida nodo: %p y nodo->elemento %d", (void*)nodo, *(int*)nodo->elemento);
-		if (nodo->elemento) {	
-			printf(" al procesar nodo %d",*(int*)nodo->elemento);
-		}
-		printf("\n");
+	if (!nodo) {
 		return 0;
 	}
-	if (nodo->elemento) 		
-		printf("pase por nodo: %d\n",*(int*)nodo->elemento);
+	if (!(*ejecucion)) {
+		return 0;
+	}
 	size_t contador = 0;
 	contador += abb_postorden(nodo->izquierda, funcion, aux, ejecucion);
 	contador += abb_postorden(nodo->derecha, funcion, aux, ejecucion);
 	if ((*ejecucion) && funcion(nodo->elemento, aux) ) {
-		if (nodo->elemento) 		
-			printf("ahora visite nodo %d y ejecucion es %s\n",*(int*)nodo->elemento,(*ejecucion)?"true":"false");
 		contador++;
 	}
 	else {
 		*ejecucion = false;
-		if (nodo->elemento) 		
-			printf("detuvo ejecucion al procesar nodo %d\n",*(int*)nodo->elemento);
-		return 1;
+		return ++contador;
 	}
-	printf("contador is %zu\n", contador);
 	return contador;
 }
 
 size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
 			     bool (*funcion)(void *, void *), void *aux)
 {
-	printf("abb_con_cada_elemento\n");
 	size_t cuantos = 0;
 	bool ejecucion = true;
 	if (!arbol || arbol->tamanio == 0 || !funcion) {
@@ -376,13 +306,13 @@ size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
 	return cuantos;
 }
 
-void imprime_array(void** array, size_t tamanio) {
+/*void imprime_array(void** array, size_t tamanio) {
 	printf("imprimiendo arreglo: ");
 	for(size_t i = 0; i<tamanio; i++){
 		printf("%d ", *(int*)array[i]);
 	}
 	printf("\n");
-}
+}*/
 
 size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
 		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
@@ -391,7 +321,7 @@ size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
 	}
 	array[*p_contador] = nodo->elemento;
 	(*p_contador)++;
-	imprime_array(array,(*p_contador));
+	//imprime_array(array,(*p_contador));
 	(*p_contador) = abb_recorrer_nodo_preorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
 	(*p_contador) = abb_recorrer_nodo_preorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
 	return *p_contador;
@@ -404,7 +334,7 @@ size_t abb_recorrer_nodo_inorden(nodo_abb_t *nodo, void **array,
 	(*p_contador) = abb_recorrer_nodo_inorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
 	array[*p_contador] = nodo->elemento;
 	(*p_contador)++;
-	imprime_array(array,(*p_contador));
+	//imprime_array(array,(*p_contador));
 	(*p_contador) = abb_recorrer_nodo_inorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
 	return *p_contador;
 }
@@ -412,24 +342,20 @@ size_t abb_recorrer_nodo_postorden(nodo_abb_t *nodo, void **array,
 		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
 	if (!nodo) 
 		return (*p_contador);
-	printf("paso por aca\n");
 	(*p_contador) = abb_recorrer_nodo_postorden(nodo->izquierda, array, tamanio_array, p_contador, ejecucion);
 	(*p_contador) = abb_recorrer_nodo_postorden(nodo->derecha, array, tamanio_array, p_contador, ejecucion);
-	if (nodo->elemento)
-		printf("guardo en posicion %zu elemento: %d, tamanio: %zu\n",(*p_contador), *(int*)nodo->elemento, tamanio_array);
 	if(*ejecucion) {
-		printf("ejecucion es true\n");
 		array[*p_contador] = nodo->elemento;
 		(*p_contador)++;
 	}
 	if ( (*p_contador) >= tamanio_array || !(*ejecucion)) {
-		printf("ejecucion detenida, p_contador: %zu y tamanio_array: %zu\n",*p_contador, tamanio_array);
 		(*ejecucion) = false;
 		return (*p_contador);
 	}
-	imprime_array(array,(*p_contador));
+	//imprime_array(array,(*p_contador));
 	return *p_contador;
 }
+
 bool funcioncita(void* elemento, void* aux) {
 	if ( *(size_t*)aux == 0 ){
 		printf("imprimiendo arreglo: ");
@@ -442,13 +368,11 @@ bool funcioncita(void* elemento, void* aux) {
 size_t abb_recorrer(abb_t *arbol, abb_recorrido recorrido, void **array,
 		    size_t tamanio_array)
 {
-	printf("abb_recorrer\n");
 	size_t contador = 0;
 	bool ejecucion = true;
 	if (!arbol || arbol->tamanio == 0) {
 		return contador;
 	}
-	size_t aux = 0;
 	switch (recorrido) {
 		case PREORDEN:
 			contador = abb_recorrer_nodo_preorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
@@ -457,8 +381,6 @@ size_t abb_recorrer(abb_t *arbol, abb_recorrido recorrido, void **array,
 			contador = abb_recorrer_nodo_inorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
 			break;
 		case POSTORDEN:
-			abb_con_cada_elemento(arbol, POSTORDEN, funcioncita, &aux );
-			printf("\n");
 			contador = abb_recorrer_nodo_postorden(arbol->nodo_raiz, array, tamanio_array, &contador, &ejecucion);
 			break;
 		default:
