@@ -232,7 +232,7 @@ size_t abb_preorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux
 		return 0;
 	}
 	size_t contador = 0;
-	if (funcion == NULL || funcion(nodo->elemento, aux) ) {
+	if (funcion != NULL && funcion(nodo->elemento, aux) ) {
 		contador++;
 	}
 	else {
@@ -252,7 +252,7 @@ size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux,
 	}
 	size_t contador = 0;
 	contador += abb_inorden(nodo->izquierda, funcion, aux, ejecucion);
-	if ((*ejecucion) && (funcion == NULL || funcion(nodo->elemento, aux) )) {
+	if ((*ejecucion) && (funcion != NULL && funcion(nodo->elemento, aux) ) ) {
 		contador++;
 	}
 	else {
@@ -272,7 +272,7 @@ size_t abb_postorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *au
 	size_t contador = 0;
 	contador += abb_postorden(nodo->izquierda, funcion, aux, ejecucion);
 	contador += abb_postorden(nodo->derecha, funcion, aux, ejecucion);
-	if ((*ejecucion) && funcion(nodo->elemento, aux) ) {
+	if ((*ejecucion) && (funcion != NULL && funcion(nodo->elemento, aux) ) ) {
 		contador++;
 	}
 	else {
@@ -312,7 +312,28 @@ size_t abb_con_cada_elemento(abb_t *arbol, abb_recorrido recorrido,
 		printf("%d ", *(int*)array[i]);
 	}
 	printf("\n");
-}*/
+}
+
+void imprimirEspacios(int cantidad) {
+    int i;
+    for (i = 0; i < cantidad; i++) {
+        printf(" ");
+    }
+}
+
+// Función para imprimir el árbol de forma gráfica
+void imprimirArbol(Nodo* raiz, int nivel) {
+    if (raiz == NULL) {
+        return;
+    }
+
+    int espacios = 5; // Espacios entre nodos
+    imprimirArbol(raiz->derecho, nivel + 1);
+    imprimirEspacios(nivel * espacios);
+    printf("%d\n", raiz->dato);
+    imprimirArbol(raiz->izquierdo, nivel + 1);
+}
+*/
 
 size_t abb_recorrer_nodo_preorden(nodo_abb_t *nodo, void **array,
 		    size_t tamanio_array, size_t* p_contador, bool* ejecucion) {
