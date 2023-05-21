@@ -254,8 +254,9 @@ size_t abb_inorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *aux,
 	contador += abb_inorden(nodo->izquierda, funcion, aux, ejecucion);
 	if ((*ejecucion) && (funcion != NULL && funcion(nodo->elemento, aux) ) ) {
 		contador++;
-	}
-	else {
+	} else if (!(*ejecucion)) {
+		return contador;
+	} else {
 		*ejecucion = false;
 		return ++contador;
 	}
@@ -274,8 +275,9 @@ size_t abb_postorden(nodo_abb_t *nodo, bool (*funcion)(void *, void *), void *au
 	contador += abb_postorden(nodo->derecha, funcion, aux, ejecucion);
 	if ((*ejecucion) && (funcion != NULL && funcion(nodo->elemento, aux) ) ) {
 		contador++;
-	}
-	else {
+	} else if (!(*ejecucion)) {
+		return contador;
+	} else {
 		*ejecucion = false;
 		return ++contador;
 	}
